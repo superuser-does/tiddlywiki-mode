@@ -199,6 +199,30 @@ type: text/vnd.tiddlywiki
   "Test that .tid files activate tiddlywiki-mode."
   (should (assoc "\\.tid\\'" auto-mode-alist)))
 
+(ert-deftest tiddlywiki-test-final-newline-defers-to-global ()
+  "Default `global' installs no buffer-local `require-final-newline'.
+`text-mode' makes the variable local, so the mode must remove that
+binding for the user's global setting to apply."
+  (with-temp-buffer
+    (tiddlywiki-mode)
+    (should-not (local-variable-p 'require-final-newline))))
+
+(ert-deftest tiddlywiki-test-final-newline-ask-override ()
+  "A non-`global' value is installed buffer-locally."
+  (let ((tiddlywiki-require-final-newline 'ask))
+    (with-temp-buffer
+      (tiddlywiki-mode)
+      (should (local-variable-p 'require-final-newline))
+      (should (eq require-final-newline 'ask)))))
+
+(ert-deftest tiddlywiki-test-final-newline-nil-override ()
+  "An explicit nil means never add, unlike `global' which defers."
+  (let ((tiddlywiki-require-final-newline nil))
+    (with-temp-buffer
+      (tiddlywiki-mode)
+      (should (local-variable-p 'require-final-newline))
+      (should (null require-final-newline)))))
+
 (provide 'tiddlywiki-mode-test)
 
 ;;; tiddlywiki-mode-test.el ends here

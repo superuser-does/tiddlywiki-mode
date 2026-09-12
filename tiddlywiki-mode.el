@@ -51,6 +51,28 @@ Should be a key in `tiddlywiki-wiki-alist'."
   :type 'boolean
   :group 'tiddlywiki)
 
+;;;###autoload
+(defcustom tiddlywiki-require-final-newline 'global
+  "How `require-final-newline' behaves in tiddlywiki-mode buffers.
+
+When `global' (the default), the mode installs no buffer-local value,
+so Emacs consults the global `require-final-newline' setting.  The
+parent mode `text-mode' would otherwise copy `mode-require-final-newline'
+\(t by default) into the buffer, which adds a newline silently on save.
+
+Any other value is installed buffer-locally and has the same meaning
+as in `require-final-newline': nil never adds one, t adds one when
+saving, visit and visit-save add one at visit and/or save time, and
+any other non-nil value asks."
+  :type '(choice
+          (const :tag "Use global `require-final-newline'" global)
+          (const :tag "Don't add newlines" nil)
+          (const :tag "When saving" t)
+          (const :tag "When visiting" visit)
+          (const :tag "When visiting or saving" visit-save)
+          (other :tag "Ask each time" ask))
+  :group 'tiddlywiki)
+
 (defvar tiddlywiki-current-wiki nil
   "The currently selected wiki name.")
 
@@ -571,6 +593,13 @@ and navigation functions for multi-wiki setups.
   ;; Paragraphs
   (setq-local paragraph-start "\f\\|[ \t]*$\\|[ \t]*[*#;:]")
   (setq-local paragraph-separate "[ \t\f]*$")
+
+  ;; Final newline: `text-mode' copies `mode-require-final-newline'
+  ;; buffer-locally, which shadows the user's global setting.  Defer
+  ;; to it unless the user chose a mode-specific value.
+  (if (eq tiddlywiki-require-final-newline 'global)
+      (kill-local-variable 'require-final-newline)
+    (setq-local require-final-newline tiddlywiki-require-final-newline))
 
   ;; Update modified timestamp on save
   (add-hook 'before-save-hook #'tiddlywiki-update-modified nil t)
