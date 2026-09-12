@@ -199,29 +199,53 @@ type: text/vnd.tiddlywiki
   "Test that .tid files activate tiddlywiki-mode."
   (should (assoc "\\.tid\\'" auto-mode-alist)))
 
+(ert-deftest tiddlywiki-test-final-newline-type-derived ()
+  "The :type reuses `require-final-newline's own options and tags.
+Emacs's \"Don't add newlines\" choice must be dropped, because nil
+here means inherit from `text-mode'."
+  (let* ((ours (cdr (get 'tiddlywiki-require-final-newline 'custom-type)))
+         (nil-consts
+          (cl-count-if
+           (lambda (opt) (and (eq (car opt) 'const) (null (car (last opt)))))
+           ours)))
+    (should (= nil-consts 1))
+    (dolist (opt (cdr (get 'require-final-newline 'custom-type)))
+      (unless (and (eq (car opt) 'const) (null (car (last opt))))
+        (should (member opt ours))))))
+
+(ert-deftest tiddlywiki-test-final-newline-default ()
+  "The default nil leaves whatever `text-mode' installs untouched.
+The expectation is derived from a plain `text-mode' buffer, so the
+test does not assume `text-mode' copies `mode-require-final-newline'."
+  (let ((mode-require-final-newline 'ask)
+        (require-final-newline nil))
+    (let ((expected
+           (with-temp-buffer
+             (text-mode)
+             (list (local-variable-p 'require-final-newline)
+                   require-final-newline))))
+      (with-temp-buffer
+        (tiddlywiki-mode)
+        (should (equal (list (local-variable-p 'require-final-newline)
+                             require-final-newline)
+                       expected))))))
+
 (ert-deftest tiddlywiki-test-final-newline-defers-to-global ()
-  "Default `global' installs no buffer-local `require-final-newline'.
+  "Value `global' installs no buffer-local `require-final-newline'.
 `text-mode' makes the variable local, so the mode must remove that
 binding for the user's global setting to apply."
-  (with-temp-buffer
-    (tiddlywiki-mode)
-    (should-not (local-variable-p 'require-final-newline))))
+  (let ((tiddlywiki-require-final-newline 'global))
+    (with-temp-buffer
+      (tiddlywiki-mode)
+      (should-not (local-variable-p 'require-final-newline)))))
 
 (ert-deftest tiddlywiki-test-final-newline-ask-override ()
-  "A non-`global' value is installed buffer-locally."
+  "A non-nil, non-`global' value is installed buffer-locally."
   (let ((tiddlywiki-require-final-newline 'ask))
     (with-temp-buffer
       (tiddlywiki-mode)
       (should (local-variable-p 'require-final-newline))
       (should (eq require-final-newline 'ask)))))
-
-(ert-deftest tiddlywiki-test-final-newline-nil-override ()
-  "An explicit nil means never add, unlike `global' which defers."
-  (let ((tiddlywiki-require-final-newline nil))
-    (with-temp-buffer
-      (tiddlywiki-mode)
-      (should (local-variable-p 'require-final-newline))
-      (should (null require-final-newline)))))
 
 (provide 'tiddlywiki-mode-test)
 

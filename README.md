@@ -95,28 +95,9 @@ Set a default wiki:
 
 ### Final newline handling
 
-`tiddlywiki-mode` derives from `text-mode`, which copies
-`mode-require-final-newline` (t by default) into every buffer as a
-buffer-local `require-final-newline`. The result is that a newline is
-added silently on save, even if you set `require-final-newline` to
-`ask` globally.
+The mode inherits `text-mode` behaviour by default. You can set to a mode-specific option with:
 
-By default (`tiddlywiki-require-final-newline` set to `global`) the
-mode removes that buffer-local value, so your global
-`require-final-newline` setting applies:
-
-```elisp
-(setq tiddlywiki-require-final-newline 'global)
-```
-
-You can also choose a value just for `.tid` buffers, with the same
-meanings as `require-final-newline`: `nil` (never add), `t` (add when
-saving), `visit`, `visit-save`, or any other non-nil value such as
-`ask`:
-
-```elisp
-(setq tiddlywiki-require-final-newline nil)
-```
+`M-x customize-variable RET tiddlywiki-require-final-newline`
 
 ## Suggested Key Bindings
 
