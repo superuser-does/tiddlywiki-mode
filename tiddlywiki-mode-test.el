@@ -202,16 +202,30 @@ type: text/vnd.tiddlywiki
 (ert-deftest tiddlywiki-test-final-newline-type-derived ()
   "The :type reuses `require-final-newline's own options and tags.
 Emacs's \"Don't add newlines\" choice must be dropped, because nil
-here means inherit from `text-mode'."
-  (let* ((ours (cdr (get 'tiddlywiki-require-final-newline 'custom-type)))
+here means inherit from `text-mode'; our own `never' const takes
+its place."
+  (let* ((type (get 'tiddlywiki-require-final-newline 'custom-type))
+         (ours (cdr type))
          (nil-consts
           (cl-count-if
            (lambda (opt) (and (eq (car opt) 'const) (null (car (last opt)))))
            ours)))
+    (should (eq (car type) 'choice))
     (should (= nil-consts 1))
+    (should (member '(const :tag "Don't add newlines" never) ours))
     (dolist (opt (cdr (get 'require-final-newline 'custom-type)))
       (unless (and (eq (car opt) 'const) (null (car (last opt))))
         (should (member opt ours))))))
+
+(ert-deftest tiddlywiki-test-final-newline-never ()
+  "Value `never' installs a buffer-local nil: never add, never ask."
+  (let ((tiddlywiki-require-final-newline 'never)
+        (mode-require-final-newline t)
+        (require-final-newline 'ask))
+    (with-temp-buffer
+      (tiddlywiki-mode)
+      (should (local-variable-p 'require-final-newline))
+      (should (null require-final-newline)))))
 
 (ert-deftest tiddlywiki-test-final-newline-default ()
   "The default nil leaves whatever `text-mode' installs untouched.
