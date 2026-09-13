@@ -68,16 +68,16 @@ inherit from `text-mode'."
        (cdr (get 'require-final-newline 'custom-type)))))
 
 ;;;###autoload
-(defcustom tiddlywiki-require-final-newline nil
+(defcustom tiddlywiki-require-final-newline 'never
   "Whether to add a newline at end of a TiddlyWiki file.
 
+A value of `never' (the default) sets it to nil locally: never add
+a newline.
 
 A value of nil keeps the buffer-local value of the parent mode
-(`text-mode',which in turn takes from `mode-require-final-newline').
+(`text-mode', which in turn takes from `mode-require-final-newline').
 
 A value of `global' takes it from `require-final-newline'.
-
-A value of `never' sets it to nil locally: never add a newline.
 
 Other values have the same meaning as in `require-final-newline',
 but are set locally."
@@ -605,11 +605,11 @@ and navigation functions for multi-wiki setups.
   (setq-local paragraph-start "\f\\|[ \t]*$\\|[ \t]*[*#;:]")
   (setq-local paragraph-separate "[ \t\f]*$")
 
-  ;; Final newline: nil (the default) does nothing, so we take the value
-  ;; `text-mode' installs from `mode-require-final-newline';
-  ;; `global' removes it so the user's global `require-final-newline'
-  ;; applies; `never' installs nil locally; any other value is
-  ;; installed buffer-locally.
+  ;; Final newline: `never' (the default) installs nil locally;
+  ;; nil does nothing, so we take the value `text-mode' installs
+  ;; from `mode-require-final-newline'; `global' removes it so the
+  ;; user's global `require-final-newline' applies; any other value
+  ;; is installed buffer-locally.
   (when tiddlywiki-require-final-newline
     (cond
      ((eq tiddlywiki-require-final-newline 'global)

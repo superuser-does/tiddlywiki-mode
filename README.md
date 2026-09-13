@@ -95,7 +95,7 @@ Set a default wiki:
 
 ### Final newline handling
 
-The mode inherits `text-mode` behaviour by default. You can set to a mode-specific option with:
+By default, the mode never adds a final newline. You can change this mode-specific option with:
 
 `M-x customize-variable RET tiddlywiki-require-final-newline`
 

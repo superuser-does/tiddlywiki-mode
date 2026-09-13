@@ -218,7 +218,7 @@ its place."
         (should (member opt ours))))))
 
 (ert-deftest tiddlywiki-test-final-newline-never ()
-  "Value `never' installs a buffer-local nil: never add, never ask."
+  "Value `never' installs a buffer-local nil (don't add newlines)."
   (let ((tiddlywiki-require-final-newline 'never)
         (mode-require-final-newline t)
         (require-final-newline 'ask))
@@ -228,10 +228,21 @@ its place."
       (should (null require-final-newline)))))
 
 (ert-deftest tiddlywiki-test-final-newline-default ()
-  "The default nil leaves whatever `text-mode' installs untouched.
+  "The default for final newlines is to `never' add or ask."
+  (let ((mode-require-final-newline t)
+        (require-final-newline 'ask))
+    (should (eq (default-value 'tiddlywiki-require-final-newline) 'never))
+    (with-temp-buffer
+      (tiddlywiki-mode)
+      (should (local-variable-p 'require-final-newline))
+      (should (null require-final-newline)))))
+
+(ert-deftest tiddlywiki-test-final-newline-inherit ()
+  "An explicit nil leaves whatever `text-mode' installs untouched.
 The expectation is derived from a plain `text-mode' buffer, so the
 test does not assume `text-mode' copies `mode-require-final-newline'."
-  (let ((mode-require-final-newline 'ask)
+  (let ((tiddlywiki-require-final-newline nil)
+        (mode-require-final-newline 'ask)
         (require-final-newline nil))
     (let ((expected
            (with-temp-buffer
