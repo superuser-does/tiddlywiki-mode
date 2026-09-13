@@ -71,8 +71,8 @@ inherit from `text-mode'."
 (defcustom tiddlywiki-require-final-newline 'never
   "Whether to add a newline at end of a TiddlyWiki file.
 
-A value of `never' (the default) sets it to nil locally: never add
-a newline.
+A value of `never' (the default) sets it to nil locally:
+never add a newline if the file does not already have one.
 
 A value of nil keeps the buffer-local value of the parent mode
 (`text-mode', which in turn takes from `mode-require-final-newline').
